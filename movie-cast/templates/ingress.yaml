@@ -1,8 +1,10 @@
-{{- if .Values.ingress.enabled }}
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "movie-cast.fullname" . -}}
+{{- $svcPort := .Values.nginx.service.port -}}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "movie-cast.fullname" . }}
+  name: {{ $fullName }}
   labels:
     {{- include "movie-cast.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
@@ -10,25 +12,16 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if .Values.ingress.className }}
   ingressClassName: {{ .Values.ingress.className }}
-  {{- end }}
   rules:
-    - host: {{ .Values.ingress.host | default "localhost" }}
+    - host: {{ .Values.ingress.host | quote }}
       http:
         paths:
-          - path: /api/v1/movies
+          - path: /(.*)
             pathType: Prefix
             backend:
               service:
-                name: {{ include "movie-cast.fullname" . }}-movie-service
+                name: {{ $fullName }}-nginx
                 port:
-                  number: {{ .Values.movieService.service.port }}
-          - path: /api/v1/casts
-            pathType: Prefix
-            backend:
-              service:
-                name: {{ include "movie-cast.fullname" . }}-cast-service
-                port:
-                  number: {{ .Values.castService.service.port }}
+                  number: {{ $svcPort }}
 {{- end }} 

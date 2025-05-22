@@ -11,9 +11,10 @@ movieService:
     tag: latest
     pullPolicy: IfNotPresent
   service:
-    type: ClusterIP
+    type: NodePort
     port: 8000
     targetPort: 8000
+    nodePort: 8001
   env:
     - name: DATABASE_URI
       value: postgresql://movie_db_username:movie_db_password@movie-cast-movie-db/movie_db_dev
@@ -36,9 +37,10 @@ castService:
     tag: latest
     pullPolicy: IfNotPresent
   service:
-    type: ClusterIP
+    type: NodePort
     port: 8000
     targetPort: 8000
+    nodePort: 8002
   env:
     - name: DATABASE_URI
       value: postgresql://cast_db_username:cast_db_password@movie-cast-cast-db/cast_db_dev
@@ -110,16 +112,15 @@ castDb:
 
 # Nginx Configuration
 nginx:
-  enabled: false
+  enabled: true
   image:
     repository: nginx
     tag: latest
     pullPolicy: IfNotPresent
   service:
-    type: NodePort
+    type: LoadBalancer
     port: 8081
     targetPort: 8081
-    nodePort: 30808
   configMap:
     enabled: true
     name: nginx-config
@@ -133,12 +134,7 @@ nginx:
 
 # Global Ingress Configuration
 ingress:
-  enabled: true
-  className: "nginx"
-  host: "jenkins.willdf.fr"
-  annotations:
-    nginx.ingress.kubernetes.io/use-regex: "true"
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+  enabled: false
 
 # Global Resources Configuration
 resources:

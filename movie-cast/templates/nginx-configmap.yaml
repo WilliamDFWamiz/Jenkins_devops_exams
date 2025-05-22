@@ -7,32 +7,16 @@ metadata:
     {{- include "movie-cast.labels" . | nindent 4 }}
     app.kubernetes.io/component: nginx
 data:
-  nginx.conf: |
-    events {
-      worker_connections 1024;
-    }
-    http {
-      proxy_cache_path /tmp/nginx_cache levels=1:2 keys_zone=my_cache:10m max_size=10g inactive=60m use_temp_path=off;
-      upstream movie_service {
-        server {{ include "movie-cast.fullname" . }}-movie:{{ .Values.movieService.service.port }};
+  default.conf: |
+    server {
+      listen 8081;
+
+      location /api/v1/movies/ {
+        proxy_pass http://{{ include "movie-cast.fullname" . }}-movie-service:{{ .Values.movieService.service.port }}/api/v1/movies/;
       }
-      upstream cast_service {
-        server {{ include "movie-cast.fullname" . }}-cast:{{ .Values.castService.service.port }};
-      }
-      server {
-        listen {{ .Values.nginx.service.port }};
-        proxy_cache off;
-        proxy_buffering off;
-        location /api/v1/movies/ {
-          proxy_pass http://movie_service;
-          proxy_set_header Host $host;
-          proxy_set_header X-Real-IP $remote_addr;
-        }
-        location /api/v1/casts/ {
-          proxy_pass http://cast_service;
-          proxy_set_header Host $host;
-          proxy_set_header X-Real-IP $remote_addr;
-        }
+
+      location /api/v1/casts/ {
+        proxy_pass http://{{ include "movie-cast.fullname" . }}-cast-service:{{ .Values.castService.service.port }}/api/v1/casts/;
       }
     }
 {{- end }} 

@@ -1,0 +1,53 @@
+# QA environment values
+movieService:
+  replicaCount: 1
+  image:
+    repository: killuazoaldyek/movie-service
+    tag: latest
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  env:
+    - name: DATABASE_URI
+      value: postgresql://movie_db_username:movie_db_password@movie-cast-movie-db/movie_db_qa
+    - name: CAST_SERVICE_HOST_URL
+      value: http://movie-cast-cast-service:8000/api/v1/casts/
+
+castService:
+  replicaCount: 1
+  image:
+    repository: killuazoaldyek/cast-service
+    tag: latest
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+  env:
+    - name: DATABASE_URI
+      value: postgresql://cast_db_username:cast_db_password@movie-cast-cast-db/cast_db_qa
+
+movieDb:
+  persistence:
+    size: 1Gi
+  env:
+    - name: POSTGRES_DB
+      value: movie_db_qa
+
+castDb:
+  persistence:
+    size: 1Gi
+  env:
+    - name: POSTGRES_DB
+      value: cast_db_qa
+
+nginx:
+  service:
+    type: LoadBalancer
+    port: 8081 
