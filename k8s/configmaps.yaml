@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: movie-service-config
+data:
+  DATABASE_URI: "postgresql://movie_db_username:movie_db_password@movie-db-service/movie_db_dev"
+  CAST_SERVICE_HOST_URL: "http://cast-service:8000/api/v1/casts/"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cast-service-config
+data:
+  DATABASE_URI: "postgresql://cast_db_username:cast_db_password@cast-db-service/cast_db_dev" 

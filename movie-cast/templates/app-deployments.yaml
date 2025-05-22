@@ -1,0 +1,101 @@
+{{- if .Values.movieService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "movie-cast.fullname" . }}-movie-service
+  labels:
+    {{- include "movie-cast.labels" . | nindent 4 }}
+    app.kubernetes.io/component: movie-service
+spec:
+  replicas: {{ .Values.movieService.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "movie-cast.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: movie-service
+  template:
+    metadata:
+      labels:
+        {{- include "movie-cast.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: movie-service
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "movie-cast.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-movie-service
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.movieService.image.repository }}:{{ .Values.movieService.image.tag }}"
+          imagePullPolicy: {{ .Values.movieService.image.pullPolicy }}
+          command: ["uvicorn"]
+          args: ["app.main:app", "--reload", "--host", "0.0.0.0", "--port", "{{ .Values.movieService.service.targetPort }}"]
+          ports:
+            - name: http
+              containerPort: {{ .Values.movieService.service.targetPort }}
+              protocol: TCP
+          env:
+            - name: DATABASE_URI
+              value: "postgresql://{{ .Values.movieDb.auth.username }}:{{ .Values.movieDb.auth.password }}@{{ include "movie-cast.fullname" . }}-movie-db/{{ .Values.movieDb.auth.database }}"
+            - name: CAST_SERVICE_HOST_URL
+              value: "http://{{ include "movie-cast.fullname" . }}-cast-service:{{ .Values.castService.service.port }}/api/v1/casts/"
+          resources:
+            {{- toYaml .Values.movieService.resources | nindent 12 }}
+      initContainers:
+        - name: wait-for-db
+          image: postgres:12.1-alpine
+          command: ['sh', '-c', 'until pg_isready -h {{ include "movie-cast.fullname" . }}-movie-db -p 5432; do echo waiting for database; sleep 2; done;']
+---
+{{- end }}
+{{- if .Values.castService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "movie-cast.fullname" . }}-cast-service
+  labels:
+    {{- include "movie-cast.labels" . | nindent 4 }}
+    app.kubernetes.io/component: cast-service
+spec:
+  replicas: {{ .Values.castService.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      {{- include "movie-cast.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: cast-service
+  template:
+    metadata:
+      labels:
+        {{- include "movie-cast.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: cast-service
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "movie-cast.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-cast-service
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.castService.image.repository }}:{{ .Values.castService.image.tag }}"
+          imagePullPolicy: {{ .Values.castService.image.pullPolicy }}
+          command: ["uvicorn"]
+          args: ["app.main:app", "--reload", "--host", "0.0.0.0", "--port", "{{ .Values.castService.service.targetPort }}"]
+          ports:
+            - name: http
+              containerPort: {{ .Values.castService.service.targetPort }}
+              protocol: TCP
+          env:
+            - name: DATABASE_URI
+              value: "postgresql://{{ .Values.castDb.auth.username }}:{{ .Values.castDb.auth.password }}@{{ include "movie-cast.fullname" . }}-cast-db/{{ .Values.castDb.auth.database }}"
+          resources:
+            {{- toYaml .Values.castService.resources | nindent 12 }}
+      initContainers:
+        - name: wait-for-db
+          image: postgres:12.1-alpine
+          command: ['sh', '-c', 'until pg_isready -h {{ include "movie-cast.fullname" . }}-cast-db -p 5432; do echo waiting for database; sleep 2; done;']
+{{- end }} 

@@ -1,0 +1,211 @@
+# Default values for movie-cast.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Movie Service Configuration
+movieService:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: killuazoaldyek/movie-cast-movies
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+  env:
+    - name: DATABASE_URI
+      value: postgresql://movie_db_username:movie_db_password@movie-cast-movie-db/movie_db_dev
+    - name: CAST_SERVICE_HOST_URL
+      value: http://movie-cast-cast-service:8000/api/v1/casts/
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+# Cast Service Configuration
+castService:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: killuazoaldyek/movie-cast-casts
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+  env:
+    - name: DATABASE_URI
+      value: postgresql://cast_db_username:cast_db_password@movie-cast-cast-db/cast_db_dev
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+
+# Movie Database Configuration
+movieDb:
+  enabled: true
+  image:
+    repository: postgres
+    tag: 12.1-alpine
+    pullPolicy: IfNotPresent
+  persistence:
+    enabled: true
+    size: 8Gi
+  env:
+    - name: POSTGRES_USER
+      value: movie_db_username
+    - name: POSTGRES_PASSWORD
+      value: movie_db_password
+    - name: POSTGRES_DB
+      value: movie_db_dev
+  auth:
+    username: movie_db_username
+    password: movie_db_password
+    database: movie_db_dev
+  resources:
+    limits:
+      cpu: 100m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+# Cast Database Configuration
+castDb:
+  enabled: true
+  image:
+    repository: postgres
+    tag: 12.1-alpine
+    pullPolicy: IfNotPresent
+  persistence:
+    enabled: true
+    size: 8Gi
+  env:
+    - name: POSTGRES_USER
+      value: cast_db_username
+    - name: POSTGRES_PASSWORD
+      value: cast_db_password
+    - name: POSTGRES_DB
+      value: cast_db_dev
+  auth:
+    username: cast_db_username
+    password: cast_db_password
+    database: cast_db_dev
+  resources:
+    limits:
+      cpu: 100m
+      memory: 256Mi
+    requests:
+      cpu: 50m
+      memory: 128Mi
+
+# Nginx Configuration
+nginx:
+  enabled: false
+  image:
+    repository: nginx
+    tag: latest
+    pullPolicy: IfNotPresent
+  service:
+    type: NodePort
+    port: 8081
+    targetPort: 8081
+    nodePort: 30808
+  configMap:
+    enabled: true
+    name: nginx-config
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+# Global Ingress Configuration
+ingress:
+  enabled: true
+  className: "nginx"
+  host: "jenkins.willdf.fr"
+  annotations:
+    nginx.ingress.kubernetes.io/use-regex: "true"
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+
+# Global Resources Configuration
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Global Security Context
+securityContext: {}
+
+# Global Pod Security Context
+podSecurityContext: {}
+
+# Global Service Account Configuration
+serviceAccount:
+  create: true
+  automount: true
+  annotations: {}
+  name: ""
+
+# Global Pod Annotations and Labels
+podAnnotations: {}
+podLabels: {}
+
+# Global Node Selector
+nodeSelector: {}
+
+# Global Tolerations
+tolerations: []
+
+# Global Affinity
+affinity: {}
+
+# Configuration for the movies service
+movies:
+  enabled: true
+  image:
+    repository: willdf/movie-cast-movies
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi
+# Configuration for the casts service
+casts:
+  enabled: true
+  image:
+    repository: willdf/movie-cast-casts
+    tag: "latest"
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 250m
+      memory: 256Mi

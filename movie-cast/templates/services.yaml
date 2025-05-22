@@ -1,0 +1,77 @@
+{{- if .Values.movieService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "movie-cast.fullname" . }}-movie-service
+  labels:
+    {{- include "movie-cast.labels" . | nindent 4 }}
+    app.kubernetes.io/component: movie-service
+spec:
+  type: {{ .Values.movieService.service.type }}
+  ports:
+    - port: {{ .Values.movieService.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "movie-cast.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: movie-service
+{{- end }}
+---
+{{- if .Values.castService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "movie-cast.fullname" . }}-cast-service
+  labels:
+    {{- include "movie-cast.labels" . | nindent 4 }}
+    app.kubernetes.io/component: cast-service
+spec:
+  type: {{ .Values.castService.service.type }}
+  ports:
+    - port: {{ .Values.castService.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "movie-cast.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: cast-service
+{{- end }}
+---
+{{- if .Values.movieDb.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "movie-cast.fullname" . }}-movie-db
+  labels:
+    {{- include "movie-cast.labels" . | nindent 4 }}
+    app.kubernetes.io/component: movie-db
+spec:
+  ports:
+    - port: 5432
+      targetPort: postgresql
+      protocol: TCP
+      name: postgresql
+  selector:
+    {{- include "movie-cast.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: movie-db
+{{- end }}
+---
+{{- if .Values.castDb.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "movie-cast.fullname" . }}-cast-db
+  labels:
+    {{- include "movie-cast.labels" . | nindent 4 }}
+    app.kubernetes.io/component: cast-db
+spec:
+  ports:
+    - port: 5432
+      targetPort: postgresql
+      protocol: TCP
+      name: postgresql
+  selector:
+    {{- include "movie-cast.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: cast-db
+{{- end }} 

@@ -1,0 +1,131 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movie-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: movie-service
+  template:
+    metadata:
+      labels:
+        app: movie-service
+    spec:
+      containers:
+      - name: movie-service
+        image: movie-service:latest
+        imagePullPolicy: IfNotPresent
+        command: ["uvicorn"]
+        args: ["app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+        envFrom:
+        - configMapRef:
+            name: movie-service-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cast-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cast-service
+  template:
+    metadata:
+      labels:
+        app: cast-service
+    spec:
+      containers:
+      - name: cast-service
+        image: cast-service:latest
+        imagePullPolicy: IfNotPresent
+        command: ["uvicorn"]
+        args: ["app.main:app", "--reload", "--host", "0.0.0.0", "--port", "8000"]
+        envFrom:
+        - configMapRef:
+            name: cast-service-config
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: movie-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: movie-db
+  template:
+    metadata:
+      labels:
+        app: movie-db
+    spec:
+      containers:
+      - name: movie-db
+        image: postgres:12.1-alpine
+        envFrom:
+        - secretRef:
+            name: movie-db-secret
+        volumeMounts:
+        - name: movie-db-storage
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: movie-db-storage
+        persistentVolumeClaim:
+          claimName: movie-db-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cast-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cast-db
+  template:
+    metadata:
+      labels:
+        app: cast-db
+    spec:
+      containers:
+      - name: cast-db
+        image: postgres:12.1-alpine
+        envFrom:
+        - secretRef:
+            name: cast-db-secret
+        volumeMounts:
+        - name: cast-db-storage
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: cast-db-storage
+        persistentVolumeClaim:
+          claimName: cast-db-pvc
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 8080
+        volumeMounts:
+        - name: nginx-config
+          mountPath: /etc/nginx/conf.d/default.conf
+          subPath: default.conf
+      volumes:
+      - name: nginx-config
+        configMap:
+          name: nginx-config 

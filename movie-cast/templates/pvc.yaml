@@ -1,0 +1,33 @@
+{{- if .Values.movieDb.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "movie-cast.fullname" . }}-movie-db
+  labels:
+    {{- include "movie-cast.labels" . | nindent 4 }}
+    app.kubernetes.io/component: movie-db
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: {{ .Values.movieDb.persistence.size }}
+{{- end }}
+---
+{{- if .Values.castDb.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "movie-cast.fullname" . }}-cast-db
+  labels:
+    {{- include "movie-cast.labels" . | nindent 4 }}
+    app.kubernetes.io/component: cast-db
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: local-path
+  resources:
+    requests:
+      storage: {{ .Values.castDb.persistence.size }}
+{{- end }} 

@@ -1,0 +1,121 @@
+{{- if .Values.movieDb.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "movie-cast.fullname" . }}-movie-db
+  labels:
+    {{- include "movie-cast.labels" . | nindent 4 }}
+    app.kubernetes.io/component: movie-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "movie-cast.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: movie-db
+  template:
+    metadata:
+      labels:
+        {{- include "movie-cast.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: movie-db
+    spec:
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}-movie-db
+          image: "{{ .Values.movieDb.image.repository }}:{{ .Values.movieDb.image.tag }}"
+          imagePullPolicy: {{ .Values.movieDb.image.pullPolicy }}
+          ports:
+            - name: postgresql
+              containerPort: 5432
+              protocol: TCP
+          env:
+            {{- toYaml .Values.movieDb.env | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - movie_db_username
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - movie_db_username
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.movieDb.resources | nindent 12 }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "movie-cast.fullname" . }}-movie-db
+{{- end }}
+---
+{{- if .Values.castDb.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "movie-cast.fullname" . }}-cast-db
+  labels:
+    {{- include "movie-cast.labels" . | nindent 4 }}
+    app.kubernetes.io/component: cast-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "movie-cast.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: cast-db
+  template:
+    metadata:
+      labels:
+        {{- include "movie-cast.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: cast-db
+    spec:
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}-cast-db
+          image: "{{ .Values.castDb.image.repository }}:{{ .Values.castDb.image.tag }}"
+          imagePullPolicy: {{ .Values.castDb.image.pullPolicy }}
+          ports:
+            - name: postgresql
+              containerPort: 5432
+              protocol: TCP
+          env:
+            {{- toYaml .Values.castDb.env | nindent 12 }}
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/postgresql/data
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - cast_db_username
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - cast_db_username
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.castDb.resources | nindent 12 }}
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: {{ include "movie-cast.fullname" . }}-cast-db
+{{- end }} 
