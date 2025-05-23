@@ -74,11 +74,29 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        docker run -d -p 8001:8000 --name movie-service $DOCKER_ID/$MOVIE_SERVICE_IMAGE:$DOCKER_TAG
-                        docker run -d -p 8002:8000 --name cast-service $DOCKER_ID/$CAST_SERVICE_IMAGE:$DOCKER_TAG
-                        sleep 10
-                        curl http://localhost:8001/api/v1/movies/docs
-                        curl http://localhost:8002/api/v1/casts/docs
+                        # Nettoyage des anciens conteneurs
+                        docker rm -f movie-service cast-service || true
+                        
+                        # Création d'un réseau Docker
+                        docker network create test-network || true
+                        
+                        # Démarrage des services dans le même réseau
+                        docker run -d --network test-network --name movie-service $DOCKER_ID/$MOVIE_SERVICE_IMAGE:$DOCKER_TAG
+                        docker run -d --network test-network --name cast-service $DOCKER_ID/$CAST_SERVICE_IMAGE:$DOCKER_TAG
+                        
+                        # Attente pour le démarrage
+                        sleep 30
+                        
+                        # Vérification que les conteneurs sont en cours d'exécution
+                        docker ps | grep movie-service
+                        docker ps | grep cast-service
+                        
+                        # Test des services en utilisant les noms des conteneurs
+                        echo "Test du service movie-service..."
+                        docker exec movie-service curl -v http://movie-service:8000/api/v1/movies/docs
+                        
+                        echo "Test du service cast-service..."
+                        docker exec cast-service curl -v http://cast-service:8000/api/v1/casts/docs
                     '''
                 }
             }
