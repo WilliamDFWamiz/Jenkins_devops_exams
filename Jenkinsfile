@@ -9,7 +9,7 @@ pipeline {
     agent any
     
     stages {
-        stage('Vérification des credentialss') {
+        stage('Vérification des credentials') {
             steps {
                 script {
                     try {
@@ -18,15 +18,28 @@ pipeline {
                         }
                     } catch (Exception e) {
                         error """
-                            Les credentials Kubernetes n'ont pas été trouvés !
-                            Veuillez configurer les credentials Kubernetes dans Jenkins :
-                            1. Allez dans 'Manage Jenkins' > 'Credentials' > 'System' > 'Global credentials'
-                            2. Cliquez sur 'Add Credentials'
-                            3. Choisissez 'Kubernetes configuration (kubeconfig)'
+                            ERREUR CRITIQUE : Les credentials Kubernetes sont manquants !
+                            Configuration requise dans Jenkins :
+                            1. 'Manage Jenkins' > 'Credentials' > 'System' > 'Global credentials'
+                            2. 'Add Credentials'
+                            3. 'Kubernetes configuration (kubeconfig)'
                             4. ID: config
-                            5. Collez votre configuration Kubernetes
+                            5. Configuration Kubernetes
                         """
                     }
+                }
+            }
+        }
+
+        stage('Vérification des dépendances') {
+            steps {
+                script {
+                    sh '''
+                        echo "Vérification de Docker..."
+                        docker --version
+                        echo "Vérification de Kubernetes..."
+                        kubectl version --client
+                    '''
                 }
             }
         }
