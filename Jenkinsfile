@@ -82,10 +82,10 @@ pipeline {
                         
                         # Démarrage des services dans le même réseau
                         echo "Démarrage du service movie-service..."
-                        docker run -d --network test-network --name movie-service $DOCKER_ID/$MOVIE_SERVICE_IMAGE:$DOCKER_TAG
+                        docker run -d --network test-network --name movie-service $DOCKER_ID/$MOVIE_SERVICE_IMAGE:$DOCKER_TAG python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000
                         
                         echo "Démarrage du service cast-service..."
-                        docker run -d --network test-network --name cast-service $DOCKER_ID/$CAST_SERVICE_IMAGE:$DOCKER_TAG
+                        docker run -d --network test-network --name cast-service $DOCKER_ID/$CAST_SERVICE_IMAGE:$DOCKER_TAG python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000
                         
                         # Attente pour le démarrage
                         echo "Attente du démarrage des services..."
