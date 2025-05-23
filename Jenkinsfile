@@ -122,6 +122,14 @@ pipeline {
                 KUBECONFIG = credentials("config")
             }
             steps {
+                script {
+                    sh '''
+                        echo "Branche actuelle : $(git branch --show-current)"
+                        echo "BRANCH_NAME: ${BRANCH_NAME}"
+                        echo "GIT_BRANCH: ${GIT_BRANCH}"
+                        echo "Vérification de la condition de branche..."
+                    '''
+                }
                 timeout(time: 15, unit: "MINUTES") {
                     input message: 'Do you want to deploy in production ?', ok: 'Yes'
                 }
@@ -131,7 +139,7 @@ pipeline {
                         mkdir .kube
                         cat $KUBECONFIG > .kube/config
                         kubectl get namespace prod || kubectl create namespace prod
-                        sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" movie-cast/environments/values-prod.yaml
+                        sed -i "s|tag:.*|tag: ${DOCKER_TAG}|g" movie-cast/environments/values-prod.yaml
                         helm upgrade --install movie-cast ./movie-cast --values=movie-cast/environments/values-prod.yaml --namespace prod
                     '''
                 }
