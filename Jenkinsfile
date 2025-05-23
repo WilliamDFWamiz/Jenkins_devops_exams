@@ -64,6 +64,10 @@ pipeline {
             steps {
                 script {
                     sh '''
+                        echo "DEBUG - Branche actuelle : $(git branch --show-current)"
+                        echo "DEBUG - GIT_BRANCH : ${GIT_BRANCH}"
+                        echo "DEBUG - BRANCH_NAME : ${BRANCH_NAME}"
+                        
                         docker login -u $DOCKER_ID -p $DOCKER_PASS
                         docker push $DOCKER_ID/$MOVIE_SERVICE_IMAGE:$DOCKER_TAG
                         docker push $DOCKER_ID/$CAST_SERVICE_IMAGE:$DOCKER_TAG
