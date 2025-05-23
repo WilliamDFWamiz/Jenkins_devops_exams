@@ -9,7 +9,7 @@ pipeline {
     agent any
     
     stages {
-        stage('Vérification des credentials') {
+        stage('Vérification des credentialss') {
             steps {
                 script {
                     try {
