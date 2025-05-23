@@ -13,8 +13,8 @@ spec:
       command: ['sh', '-c']
       args:
         - |
-          echo "Testing movie service docs..."
+          echo "Testing movie service docs....."
           wget -S -O- http://{{ include "movie-cast.fullname" . }}-nginx:{{ .Values.nginx.service.port }}/api/v1/movies/docs
-          echo "Testing cast service docs..."
+          echo "Testing cast service docs....."
           wget -S -O- http://{{ include "movie-cast.fullname" . }}-nginx:{{ .Values.nginx.service.port }}/api/v1/casts/docs
   restartPolicy: Never
