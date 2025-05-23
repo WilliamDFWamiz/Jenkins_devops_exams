@@ -88,8 +88,25 @@ pipeline {
                         sleep 30
                         
                         # Vérification que les conteneurs sont en cours d'exécution
-                        docker ps | grep movie-service
-                        docker ps | grep cast-service
+                        echo "État des conteneurs :"
+                        docker ps -a
+                        
+                        echo "Logs du conteneur movie-service :"
+                        docker logs movie-service
+                        
+                        echo "Logs du conteneur cast-service :"
+                        docker logs cast-service
+                        
+                        # Vérification que les conteneurs sont en cours d'exécution
+                        if ! docker ps | grep -q movie-service; then
+                            echo "Le conteneur movie-service n'est pas en cours d'exécution"
+                            exit 1
+                        fi
+                        
+                        if ! docker ps | grep -q cast-service; then
+                            echo "Le conteneur cast-service n'est pas en cours d'exécution"
+                            exit 1
+                        fi
                         
                         # Test des services en utilisant les noms des conteneurs
                         echo "Test du service movie-service..."
