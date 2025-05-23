@@ -120,7 +120,9 @@ pipeline {
         
         stage('Deploiement en prod') {
             when {
-                branch 'master'
+                expression { 
+                    return env.GIT_BRANCH == 'origin/master'
+                }
             }
             environment {
                 KUBECONFIG = credentials("config")
