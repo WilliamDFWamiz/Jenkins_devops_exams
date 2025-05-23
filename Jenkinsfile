@@ -101,7 +101,13 @@ pipeline {
                         mkdir .kube
                         cat $KUBECONFIG > .kube/config
                         kubectl get namespace staging || kubectl create namespace staging
-                        sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" movie-cast/environments/values-staging.yaml
+                        
+                        # Mise à jour du tag de manière plus sûre
+                        sed -i "s|tag:.*|tag: ${DOCKER_TAG}|g" movie-cast/environments/values-staging.yaml
+                        
+                        # Vérification du fichier YAML
+                        cat movie-cast/environments/values-staging.yaml
+                        
                         helm upgrade --install movie-cast ./movie-cast --values=movie-cast/environments/values-staging.yaml --namespace staging
                     '''
                 }
