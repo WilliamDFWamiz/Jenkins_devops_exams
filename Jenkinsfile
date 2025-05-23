@@ -74,23 +74,28 @@ pipeline {
             steps {
                 script {
                     sh '''
-                        # Nettoyage des anciens conteneurs
-                        docker rm -f movie-service cast-service || true
+                        # Nettoyage des anciens conteneurs (les erreurs sont normales si les conteneurs n'existent pas)
+                        docker rm -f movie-service cast-service 2>/dev/null || true
                         
                         # Création d'un réseau Docker
                         docker network create test-network || true
                         
                         # Démarrage des services dans le même réseau
+                        echo "Démarrage du service movie-service..."
                         docker run -d --network test-network --name movie-service $DOCKER_ID/$MOVIE_SERVICE_IMAGE:$DOCKER_TAG
+                        
+                        echo "Démarrage du service cast-service..."
                         docker run -d --network test-network --name cast-service $DOCKER_ID/$CAST_SERVICE_IMAGE:$DOCKER_TAG
                         
                         # Attente pour le démarrage
+                        echo "Attente du démarrage des services..."
                         sleep 30
                         
-                        # Vérification que les conteneurs sont en cours d'exécution
+                        # Vérification de l'état des conteneurs
                         echo "État des conteneurs :"
                         docker ps -a
                         
+                        # Affichage des logs pour comprendre pourquoi les conteneurs s'arrêtent
                         echo "Logs du conteneur movie-service :"
                         docker logs movie-service
                         
@@ -99,12 +104,12 @@ pipeline {
                         
                         # Vérification que les conteneurs sont en cours d'exécution
                         if ! docker ps | grep -q movie-service; then
-                            echo "Le conteneur movie-service n'est pas en cours d'exécution"
+                            echo "ERREUR : Le conteneur movie-service n'est pas en cours d'exécution"
                             exit 1
                         fi
                         
                         if ! docker ps | grep -q cast-service; then
-                            echo "Le conteneur cast-service n'est pas en cours d'exécution"
+                            echo "ERREUR : Le conteneur cast-service n'est pas en cours d'exécution"
                             exit 1
                         fi
                         
