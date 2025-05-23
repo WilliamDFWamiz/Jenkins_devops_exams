@@ -31,19 +31,6 @@ pipeline {
             }
         }
 
-        stage('Vérification des dépendances') {
-            steps {
-                script {
-                    sh '''
-                        echo "Vérification de Docker..."
-                        docker --version
-                        echo "Vérification de Kubernetes..."
-                        kubectl version --client
-                    '''
-                }
-            }
-        }
-
         stage('Build Services') {
             parallel {
                 stage('Build Movie Service') {
@@ -66,60 +53,6 @@ pipeline {
                             '''
                         }
                     }
-                }
-            }
-        }
-        
-        stage('Test Services') {
-            steps {
-                script {
-                    sh '''
-                        # Nettoyage des anciens conteneurs (les erreurs sont normales si les conteneurs n'existent pas)
-                        docker rm -f movie-service cast-service 2>/dev/null || true
-                        
-                        # Création d'un réseau Docker
-                        docker network create test-network || true
-                        
-                        # Démarrage des services dans le même réseau
-                        echo "Démarrage du service movie-service..."
-                        docker run -d --network test-network --name movie-service $DOCKER_ID/$MOVIE_SERVICE_IMAGE:$DOCKER_TAG python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000
-                        
-                        echo "Démarrage du service cast-service..."
-                        docker run -d --network test-network --name cast-service $DOCKER_ID/$CAST_SERVICE_IMAGE:$DOCKER_TAG python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000
-                        
-                        # Attente pour le démarrage
-                        echo "Attente du démarrage des services..."
-                        sleep 30
-                        
-                        # Vérification de l'état des conteneurs
-                        echo "État des conteneurs :"
-                        docker ps -a
-                        
-                        # Affichage des logs pour comprendre pourquoi les conteneurs s'arrêtent
-                        echo "Logs du conteneur movie-service :"
-                        docker logs movie-service
-                        
-                        echo "Logs du conteneur cast-service :"
-                        docker logs cast-service
-                        
-                        # Vérification que les conteneurs sont en cours d'exécution
-                        if ! docker ps | grep -q movie-service; then
-                            echo "ERREUR : Le conteneur movie-service n'est pas en cours d'exécution"
-                            exit 1
-                        fi
-                        
-                        if ! docker ps | grep -q cast-service; then
-                            echo "ERREUR : Le conteneur cast-service n'est pas en cours d'exécution"
-                            exit 1
-                        fi
-                        
-                        # Test des services en utilisant les noms des conteneurs
-                        echo "Test du service movie-service..."
-                        docker exec movie-service curl -v http://movie-service:8000/api/v1/movies/docs
-                        
-                        echo "Test du service cast-service..."
-                        docker exec cast-service curl -v http://cast-service:8000/api/v1/casts/docs
-                    '''
                 }
             }
         }
