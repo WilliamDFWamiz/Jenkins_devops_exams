@@ -55,3 +55,14 @@ nginx:
 serviceAccount:
   create: true
   name: "movie-cast-sa"
+
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  hosts:
+    - host: movie-cast-dev.local
+      paths:
+        - path: /
+          pathType: Prefix
