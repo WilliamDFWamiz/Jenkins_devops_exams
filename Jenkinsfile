@@ -69,8 +69,16 @@ pipeline {
                         echo "DEBUG - BRANCH_NAME : ${BRANCH_NAME}"
                         
                         docker login -u $DOCKER_ID -p $DOCKER_PASS
+                        
+                        # Tag et push avec le tag de version
                         docker push $DOCKER_ID/$MOVIE_SERVICE_IMAGE:$DOCKER_TAG
                         docker push $DOCKER_ID/$CAST_SERVICE_IMAGE:$DOCKER_TAG
+                        
+                        # Tag et push avec le tag latest
+                        docker tag $DOCKER_ID/$MOVIE_SERVICE_IMAGE:$DOCKER_TAG $DOCKER_ID/$MOVIE_SERVICE_IMAGE:latest
+                        docker tag $DOCKER_ID/$CAST_SERVICE_IMAGE:$DOCKER_TAG $DOCKER_ID/$CAST_SERVICE_IMAGE:latest
+                        docker push $DOCKER_ID/$MOVIE_SERVICE_IMAGE:latest
+                        docker push $DOCKER_ID/$CAST_SERVICE_IMAGE:latest
                     '''
                 }
             }
