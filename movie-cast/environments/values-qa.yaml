@@ -51,3 +51,7 @@ nginx:
   service:
     type: LoadBalancer
     port: 8081 
+
+serviceAccount:
+  create: true
+  name: "movie-cast-sa" 
