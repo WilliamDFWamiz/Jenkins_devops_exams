@@ -4,6 +4,7 @@ pipeline {
         MOVIE_SERVICE_IMAGE = "movie-service"
         CAST_SERVICE_IMAGE = "cast-service"
         DOCKER_TAG = "v.${BUILD_ID}.0"
+        COMMIT_SHA = sh(script: 'git rev-parse --short HEAD', returnStdout: true).trim()
     }
     
     agent any
@@ -67,6 +68,7 @@ pipeline {
                         echo "DEBUG - Branche actuelle : $(git branch --show-current)"
                         echo "DEBUG - GIT_BRANCH : ${GIT_BRANCH}"
                         echo "DEBUG - BRANCH_NAME : ${BRANCH_NAME}"
+                        echo "DEBUG - COMMIT SHA : ${COMMIT_SHA}"
                         
                         docker login -u $DOCKER_ID -p $DOCKER_PASS
                         
@@ -77,6 +79,14 @@ pipeline {
                         # Tag et push avec le tag latest
                         docker tag $DOCKER_ID/$MOVIE_SERVICE_IMAGE:$DOCKER_TAG $DOCKER_ID/$MOVIE_SERVICE_IMAGE:latest
                         docker tag $DOCKER_ID/$CAST_SERVICE_IMAGE:$DOCKER_TAG $DOCKER_ID/$CAST_SERVICE_IMAGE:latest
+                        
+                        # Tag et push avec le SHA du commit
+                        docker tag $DOCKER_ID/$MOVIE_SERVICE_IMAGE:$DOCKER_TAG $DOCKER_ID/$MOVIE_SERVICE_IMAGE:${COMMIT_SHA}
+                        docker tag $DOCKER_ID/$CAST_SERVICE_IMAGE:$DOCKER_TAG $DOCKER_ID/$CAST_SERVICE_IMAGE:${COMMIT_SHA}
+                        docker push $DOCKER_ID/$MOVIE_SERVICE_IMAGE:${COMMIT_SHA}
+                        docker push $DOCKER_ID/$CAST_SERVICE_IMAGE:${COMMIT_SHA}
+                        
+                        # Push des tags latest
                         docker push $DOCKER_ID/$MOVIE_SERVICE_IMAGE:latest
                         docker push $DOCKER_ID/$CAST_SERVICE_IMAGE:latest
                     '''
