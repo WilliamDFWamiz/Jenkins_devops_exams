@@ -22,11 +22,11 @@ movieService:
       value: http://movie-cast-cast-service:8000/api/v1/casts/
   resources:
     limits:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 200m
+      memory: 128Mi
     requests:
-      cpu: 250m
-      memory: 256Mi
+      cpu: 50m
+      memory: 64Mi
 
 # Cast Service Configuration
 castService:
@@ -46,11 +46,11 @@ castService:
       value: postgresql://cast_db_username:cast_db_password@movie-cast-cast-db/cast_db_dev
   resources:
     limits:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 200m
+      memory: 128Mi
     requests:
-      cpu: 250m
-      memory: 256Mi
+      cpu: 50m
+      memory: 64Mi
 
 # Movie Database Configuration
 movieDb:
@@ -75,11 +75,11 @@ movieDb:
     database: movie_db_dev
   resources:
     limits:
-      cpu: 100m
-      memory: 256Mi
-    requests:
       cpu: 50m
       memory: 128Mi
+    requests:
+      cpu: 25m
+      memory: 64Mi
 
 # Cast Database Configuration
 castDb:
@@ -104,11 +104,11 @@ castDb:
     database: cast_db_dev
   resources:
     limits:
-      cpu: 100m
-      memory: 256Mi
-    requests:
       cpu: 50m
       memory: 128Mi
+    requests:
+      cpu: 25m
+      memory: 64Mi
 
 # Nginx Configuration
 nginx:
@@ -126,11 +126,11 @@ nginx:
     name: nginx-config
   resources:
     limits:
-      cpu: 100m
-      memory: 128Mi
-    requests:
       cpu: 50m
       memory: 64Mi
+    requests:
+      cpu: 25m
+      memory: 32Mi
 
 # Global Ingress Configuration
 ingress:
@@ -183,11 +183,11 @@ movies:
     port: 8080
   resources:
     limits:
-      cpu: 500m
-      memory: 512Mi
-    requests:
-      cpu: 250m
+      cpu: 300m
       memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 # Configuration for the casts service
 casts:
   enabled: true
@@ -200,8 +200,8 @@ casts:
     port: 8080
   resources:
     limits:
-      cpu: 500m
-      memory: 512Mi
-    requests:
-      cpu: 250m
+      cpu: 300m
       memory: 256Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi

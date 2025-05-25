@@ -6,11 +6,11 @@ movieService:
     tag: latest
   resources:
     limits:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 200m
+      memory: 128Mi
     requests:
-      cpu: 250m
-      memory: 256Mi
+      cpu: 50m
+      memory: 64Mi
   env:
     - name: DATABASE_URI
       value: postgresql://movie_db_username:movie_db_password@movie-cast-movie-db/movie_db_dev
@@ -24,11 +24,11 @@ castService:
     tag: latest
   resources:
     limits:
-      cpu: 500m
-      memory: 512Mi
+      cpu: 200m
+      memory: 128Mi
     requests:
-      cpu: 250m
-      memory: 256Mi
+      cpu: 50m
+      memory: 64Mi
   env:
     - name: DATABASE_URI
       value: postgresql://cast_db_username:cast_db_password@movie-cast-cast-db/cast_db_dev
@@ -50,4 +50,8 @@ castDb:
 nginx:
   service:
     type: LoadBalancer
-    port: 8081 
+    port: 8081
+
+serviceAccount:
+  create: true
+  name: "movie-cast-sa" 
