@@ -1,6 +1,6 @@
 # Production environment values
 movieService:
-  replicaCount: 1
+  replicaCount: 2
   image:
     repository: killuazoaldyek/movie-service
     tag: latest
@@ -18,7 +18,7 @@ movieService:
       value: http://movie-cast-cast-service:8000/api/v1/casts/
 
 castService:
-  replicaCount: 1
+  replicaCount: 2
   image:
     repository: killuazoaldyek/cast-service
     tag: latest
@@ -34,23 +34,59 @@ castService:
       value: postgresql://cast_db_username:cast_db_password@movie-cast-cast-db/cast_db_prod
 
 movieDb:
+  enabled: true
+  image:
+    repository: postgres
+    tag: 12.1-alpine
+    pullPolicy: IfNotPresent
   persistence:
-    size: 1Gi
+    enabled: true
+    size: 5Gi
   env:
+    - name: POSTGRES_USER
+      value: movie_db_username
+    - name: POSTGRES_PASSWORD
+      value: movie_db_password
     - name: POSTGRES_DB
       value: movie_db_prod
 
 castDb:
+  enabled: true
+  image:
+    repository: postgres
+    tag: 12.1-alpine
+    pullPolicy: IfNotPresent
   persistence:
-    size: 1Gi
+    enabled: true
+    size: 5Gi
   env:
+    - name: POSTGRES_USER
+      value: cast_db_username
+    - name: POSTGRES_PASSWORD
+      value: cast_db_password
     - name: POSTGRES_DB
       value: cast_db_prod
 
 nginx:
+  enabled: true
+  image:
+    repository: nginx
+    tag: latest
+    pullPolicy: IfNotPresent
   service:
     type: LoadBalancer
-    port: 8081 
+    port: 8081
+    targetPort: 8081
+  configMap:
+    enabled: true
+    name: nginx-config
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
 
 serviceAccount:
   create: true

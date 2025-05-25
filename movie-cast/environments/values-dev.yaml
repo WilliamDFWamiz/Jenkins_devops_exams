@@ -34,23 +34,59 @@ castService:
       value: postgresql://cast_db_username:cast_db_password@movie-cast-cast-db/cast_db_dev
 
 movieDb:
+  enabled: true
+  image:
+    repository: postgres
+    tag: 12.1-alpine
+    pullPolicy: IfNotPresent
   persistence:
+    enabled: true
     size: 1Gi
   env:
+    - name: POSTGRES_USER
+      value: movie_db_username
+    - name: POSTGRES_PASSWORD
+      value: movie_db_password
     - name: POSTGRES_DB
       value: movie_db_dev
 
 castDb:
+  enabled: true
+  image:
+    repository: postgres
+    tag: 12.1-alpine
+    pullPolicy: IfNotPresent
   persistence:
+    enabled: true
     size: 1Gi
   env:
+    - name: POSTGRES_USER
+      value: cast_db_username
+    - name: POSTGRES_PASSWORD
+      value: cast_db_password
     - name: POSTGRES_DB
       value: cast_db_dev
 
 nginx:
+  enabled: true
+  image:
+    repository: nginx
+    tag: latest
+    pullPolicy: IfNotPresent
   service:
     type: LoadBalancer
     port: 8081
+    targetPort: 8081
+  configMap:
+    enabled: true
+    name: nginx-config
+  resources:
+    limits:
+      cpu: 50m
+      memory: 64Mi
+    requests:
+      cpu: 25m
+      memory: 32Mi
 
 serviceAccount:
   create: true
