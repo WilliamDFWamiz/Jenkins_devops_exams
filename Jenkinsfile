@@ -104,6 +104,21 @@ pipeline {
                         rm -Rf .kube
                         mkdir .kube
                         cat $KUBECONFIG > .kube/config
+                        
+                        # Nettoyage des ressources existantes
+                        echo "Nettoyage des ressources dans le namespace dev..."
+                        kubectl delete deployment -l app.kubernetes.io/instance=movie-cast -n dev --ignore-not-found=true
+                        kubectl delete service -l app.kubernetes.io/instance=movie-cast -n dev --ignore-not-found=true
+                        kubectl delete ingress -l app.kubernetes.io/instance=movie-cast -n dev --ignore-not-found=true
+                        
+                        # Attente que tous les pods soient supprimés
+                        echo "Attente de la suppression des pods..."
+                        while kubectl get pods -n dev -l app.kubernetes.io/instance=movie-cast 2>/dev/null | grep -q .; do
+                            echo "Pods en cours de suppression..."
+                            sleep 2
+                        done
+                        echo "Tous les pods ont été supprimés"
+                        
                         kubectl get namespace dev || kubectl create namespace dev
                         sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" movie-cast/environments/values-dev.yaml
                         helm upgrade --install movie-cast ./movie-cast --values=movie-cast/environments/values-dev.yaml --namespace dev
@@ -122,14 +137,23 @@ pipeline {
                         rm -Rf .kube
                         mkdir .kube
                         cat $KUBECONFIG > .kube/config
+                        
+                        # Nettoyage des ressources existantes
+                        echo "Nettoyage des ressources dans le namespace staging..."
+                        kubectl delete deployment -l app.kubernetes.io/instance=movie-cast -n staging --ignore-not-found=true
+                        kubectl delete service -l app.kubernetes.io/instance=movie-cast -n staging --ignore-not-found=true
+                        kubectl delete ingress -l app.kubernetes.io/instance=movie-cast -n staging --ignore-not-found=true
+                        
+                        # Attente que tous les pods soient supprimés
+                        echo "Attente de la suppression des pods..."
+                        while kubectl get pods -n staging -l app.kubernetes.io/instance=movie-cast 2>/dev/null | grep -q .; do
+                            echo "Pods en cours de suppression..."
+                            sleep 2
+                        done
+                        echo "Tous les pods ont été supprimés"
+                        
                         kubectl get namespace staging || kubectl create namespace staging
-                        
-                        # Mise à jour du tag de manière plus sûre
                         sed -i "s|tag:.*|tag: ${DOCKER_TAG}|g" movie-cast/environments/values-staging.yaml
-                        
-                        # Vérification du fichier YAML
-                        cat movie-cast/environments/values-staging.yaml
-                        
                         helm upgrade --install movie-cast ./movie-cast --values=movie-cast/environments/values-staging.yaml --namespace staging
                     '''
                 }
@@ -162,6 +186,21 @@ pipeline {
                         rm -Rf .kube
                         mkdir .kube
                         cat $KUBECONFIG > .kube/config
+                        
+                        # Nettoyage des ressources existantes
+                        echo "Nettoyage des ressources dans le namespace prod..."
+                        kubectl delete deployment -l app.kubernetes.io/instance=movie-cast -n prod --ignore-not-found=true
+                        kubectl delete service -l app.kubernetes.io/instance=movie-cast -n prod --ignore-not-found=true
+                        kubectl delete ingress -l app.kubernetes.io/instance=movie-cast -n prod --ignore-not-found=true
+                        
+                        # Attente que tous les pods soient supprimés
+                        echo "Attente de la suppression des pods..."
+                        while kubectl get pods -n prod -l app.kubernetes.io/instance=movie-cast 2>/dev/null | grep -q .; do
+                            echo "Pods en cours de suppression..."
+                            sleep 2
+                        done
+                        echo "Tous les pods ont été supprimés"
+                        
                         kubectl get namespace prod || kubectl create namespace prod
                         sed -i "s|tag:.*|tag: ${DOCKER_TAG}|g" movie-cast/environments/values-prod.yaml
                         helm upgrade --install movie-cast ./movie-cast --values=movie-cast/environments/values-prod.yaml --namespace prod
