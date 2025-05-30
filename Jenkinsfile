@@ -112,10 +112,6 @@ pipeline {
                         }
                     }
                 }
-            }
-        }
-        stage('deploy test env') {
-            parallel {
                 stage('Deploiement en QA') {
                     environment {
                         KUBECONFIG = credentials("config")
@@ -133,23 +129,22 @@ pipeline {
                         }
                     }
                 }
-            }
-        }
-        
-        stage('Deploiement en staging') {
-            environment {
-                KUBECONFIG = credentials("config")
-            }
-            steps {
-                script {
-                    sh '''
-                        rm -Rf .kube
-                        mkdir .kube
-                        cat $KUBECONFIG > .kube/config
-                        kubectl get namespace staging || kubectl create namespace staging
-                        sed -i "s|tag:.*|tag: ${DOCKER_TAG}|g" movie-cast/environments/values-staging.yaml
-                        helm upgrade --install movie-cast ./movie-cast --values=movie-cast/environments/values-staging.yaml --namespace staging
-                    '''
+                stage('Deploiement en staging') {
+                    environment {
+                        KUBECONFIG = credentials("config")
+                    }
+                    steps {
+                        script {
+                            sh '''
+                            rm -Rf .kube
+                            mkdir .kube
+                            cat $KUBECONFIG > .kube/config
+                            kubectl get namespace staging || kubectl create namespace staging
+                            sed -i "s|tag:.*|tag: ${DOCKER_TAG}|g" movie-cast/environments/values-staging.yaml
+                            helm upgrade --install movie-cast ./movie-cast --values=movie-cast/environments/values-staging.yaml --namespace staging
+                            '''
+                        }
+                    }
                 }
             }
         }
