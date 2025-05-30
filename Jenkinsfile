@@ -93,21 +93,45 @@ pipeline {
                 }
             }
         }
-        
-        stage('Deploiement en dev') {
-            environment {
-                KUBECONFIG = credentials("config")
+        stage('deploy test env') {
+            parallel {
+                stage('Deploiement en dev') {
+                    environment {
+                        KUBECONFIG = credentials("config")
+                    }
+                    steps {
+                        script {
+                            sh '''
+                            rm -Rf .kube
+                            mkdir .kube
+                            cat $KUBECONFIG > .kube/config
+                            kubectl get namespace dev || kubectl create namespace dev
+                            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" movie-cast/environments/values-dev.yaml
+                            helm upgrade --install movie-cast ./movie-cast --values=movie-cast/environments/values-dev.yaml --namespace dev
+                            '''
+                        }
+                    }
+                }
             }
-            steps {
-                script {
-                    sh '''
-                        rm -Rf .kube
-                        mkdir .kube
-                        cat $KUBECONFIG > .kube/config
-                        kubectl get namespace dev || kubectl create namespace dev
-                        sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" movie-cast/environments/values-dev.yaml
-                        helm upgrade --install movie-cast ./movie-cast --values=movie-cast/environments/values-dev.yaml --namespace dev
-                    '''
+        }
+        stage('deploy test env') {
+            parallel {
+                stage('Deploiement en QA') {
+                    environment {
+                        KUBECONFIG = credentials("config")
+                    }
+                    steps {
+                        script {
+                            sh '''
+                            rm -Rf .kube
+                            mkdir .kube
+                            cat $KUBECONFIG > .kube/config
+                            kubectl get namespace qa || kubectl create namespace qa
+                            sed -i "s+tag.*+tag: ${DOCKER_TAG}+g" movie-cast/environments/values-qa.yaml
+                            helm upgrade --install movie-cast ./movie-cast --values=movie-cast/environments/values-qa.yaml --namespace qa
+                            '''
+                        }
+                    }
                 }
             }
         }
