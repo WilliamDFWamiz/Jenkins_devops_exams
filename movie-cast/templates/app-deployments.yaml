@@ -32,16 +32,13 @@ spec:
           image: "{{ .Values.movieService.image.repository }}:{{ .Values.movieService.image.tag }}"
           imagePullPolicy: {{ .Values.movieService.image.pullPolicy }}
           command: ["uvicorn"]
-          args: ["app.main:app", "--reload", "--host", "0.0.0.0", "--port", "{{ .Values.movieService.service.targetPort }}"]
+          args: ["app.main:app", "--reload", "--host", "0.0.0.0", "--port", "{{ .Values.movieService.service.port }}"]
           ports:
             - name: http
-              containerPort: {{ .Values.movieService.service.targetPort }}
+              containerPort: {{ .Values.movieService.service.port }}
               protocol: TCP
           env:
-            - name: DATABASE_URI
-              value: "postgresql://{{ .Values.movieDb.auth.username }}:{{ .Values.movieDb.auth.password }}@{{ include "movie-cast.fullname" . }}-movie-db/{{ .Values.movieDb.auth.database }}"
-            - name: CAST_SERVICE_HOST_URL
-              value: "http://{{ include "movie-cast.fullname" . }}-cast-service:{{ .Values.castService.service.port }}/api/v1/casts/"
+{{- toYaml .Values.movieService.env | nindent 12 }}
           resources:
             {{- toYaml .Values.movieService.resources | nindent 12 }}
       initContainers:
@@ -84,14 +81,13 @@ spec:
           image: "{{ .Values.castService.image.repository }}:{{ .Values.castService.image.tag }}"
           imagePullPolicy: {{ .Values.castService.image.pullPolicy }}
           command: ["uvicorn"]
-          args: ["app.main:app", "--reload", "--host", "0.0.0.0", "--port", "{{ .Values.castService.service.targetPort }}"]
+          args: ["app.main:app", "--reload", "--host", "0.0.0.0", "--port", "{{ .Values.castService.service.port }}"]
           ports:
             - name: http
-              containerPort: {{ .Values.castService.service.targetPort }}
+              containerPort: {{ .Values.castService.service.port }}
               protocol: TCP
           env:
-            - name: DATABASE_URI
-              value: "postgresql://{{ .Values.castDb.auth.username }}:{{ .Values.castDb.auth.password }}@{{ include "movie-cast.fullname" . }}-cast-db/{{ .Values.castDb.auth.database }}"
+{{- toYaml .Values.castService.env | nindent 12 }}
           resources:
             {{- toYaml .Values.castService.resources | nindent 12 }}
       initContainers:

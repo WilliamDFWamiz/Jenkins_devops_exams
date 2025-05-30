@@ -1,5 +1,6 @@
 # Staging environment values
 movieService:
+  enabled: true
   replicaCount: 1
   image:
     repository: killuazoaldyek/movie-service
@@ -20,6 +21,7 @@ movieService:
       value: http://movie-cast-cast-service:8000/api/v1/casts/
 
 castService:
+  enabled: true
   replicaCount: 1
   image:
     repository: killuazoaldyek/cast-service
@@ -80,7 +82,6 @@ nginx:
   service:
     type: NodePort
     port: 8081
-    targetPort: 8081
     nodePort: 30083
   configMap:
     enabled: true

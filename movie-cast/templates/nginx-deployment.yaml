@@ -30,7 +30,7 @@ spec:
           imagePullPolicy: {{ .Values.nginx.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.nginx.service.targetPort }}
+              containerPort: {{ .Values.nginx.service.port }}
               protocol: TCP
           volumeMounts:
             - name: nginx-config

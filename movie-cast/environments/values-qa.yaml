@@ -1,5 +1,6 @@
 # QA environment values
 movieService:
+  enabled: true
   replicaCount: 1
   image:
     repository: killuazoaldyek/movie-service
@@ -20,6 +21,7 @@ movieService:
       value: http://movie-cast-cast-service:8000/api/v1/casts/
 
 castService:
+  enabled: true
   replicaCount: 1
   image:
     repository: killuazoaldyek/cast-service
@@ -95,4 +97,7 @@ nginx:
 
 serviceAccount:
   create: true
-  name: "movie-cast-sa" 
+  name: "movie-cast-sa"
+
+ingress:
+  enabled: false 

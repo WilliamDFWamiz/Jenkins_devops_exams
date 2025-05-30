@@ -10,7 +10,7 @@ spec:
   type: {{ .Values.nginx.service.type }}
   ports:
     - port: {{ .Values.nginx.service.port }}
-      targetPort: {{ .Values.nginx.service.targetPort }}
+      targetPort: {{ .Values.nginx.service.port }}
       protocol: TCP
       name: http
       {{- if eq .Values.nginx.service.type "NodePort" }}
