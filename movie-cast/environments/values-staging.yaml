@@ -4,6 +4,8 @@ movieService:
   image:
     repository: killuazoaldyek/movie-service
     tag: latest
+  service:
+    port: 8000
   resources:
     limits:
       cpu: 200m
@@ -22,6 +24,8 @@ castService:
   image:
     repository: killuazoaldyek/cast-service
     tag: latest
+  service:
+    port: 8000
   resources:
     limits:
       cpu: 200m
@@ -74,9 +78,10 @@ nginx:
     tag: latest
     pullPolicy: IfNotPresent
   service:
-    type: LoadBalancer
+    type: NodePort
     port: 8081
     targetPort: 8081
+    nodePort: 30083
   configMap:
     enabled: true
     name: nginx-config
@@ -87,6 +92,14 @@ nginx:
     requests:
       cpu: 25m
       memory: 32Mi
+
+ingress:
+  enabled: false
+  className: "nginx"
+  host: "jenkins.willdf.fr"
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
 
 serviceAccount:
   create: true

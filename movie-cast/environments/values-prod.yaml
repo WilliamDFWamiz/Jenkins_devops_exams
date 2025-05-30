@@ -4,6 +4,8 @@ movieService:
   image:
     repository: killuazoaldyek/movie-service
     tag: latest
+  service:
+    port: 8000
   resources:
     limits:
       cpu: 500m
@@ -22,6 +24,8 @@ castService:
   image:
     repository: killuazoaldyek/cast-service
     tag: latest
+  service:
+    port: 8000
   resources:
     limits:
       cpu: 500m
@@ -74,9 +78,10 @@ nginx:
     tag: latest
     pullPolicy: IfNotPresent
   service:
-    type: LoadBalancer
+    type: NodePort
     port: 8081
     targetPort: 8081
+    nodePort: 30084
   configMap:
     enabled: true
     name: nginx-config
